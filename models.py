@@ -9,8 +9,8 @@ class Encoder(nn.Module):
     """
     Encoder.
     """
-
-    def __init__(self, encoded_image_size=14):
+    # ================Pass new values======================
+    def __init__(self, vocab_size, embed_dim, encoded_image_size=14):
         super(Encoder, self).__init__()
         self.enc_image_size = encoded_image_size
 
@@ -19,13 +19,22 @@ class Encoder(nn.Module):
         # Remove linear and pool layers (since we're not doing classification)
         modules = list(resnet.children())[:-2]
         self.resnet = nn.Sequential(*modules)
-
+        
+        # Adding layers to shrink number of channels
+        self.conv = nn.Conv2d(2048, 1024, kernel_size=(1,1), bias=False)
+        self.bn = nn.BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        self.relu = nn.ReLU()
+        
         # Resize image to fixed size to allow input images of variable size
         self.adaptive_pool = nn.AdaptiveAvgPool2d((encoded_image_size, encoded_image_size))
+        
+        # Embedding layer for keywords
+        self.embedding = nn.Embedding(vocab_size, embed_dim)
 
         self.fine_tune()
 
-    def forward(self, images):
+    # ================Pass new values======================
+    def forward(self, images, encoded_keywords):
         """
         Forward propagation.
 
@@ -33,8 +42,22 @@ class Encoder(nn.Module):
         :return: encoded images
         """
         out = self.resnet(images)  # (batch_size, 2048, image_size/32, image_size/32)
-        out = self.adaptive_pool(out)  # (batch_size, 2048, encoded_image_size, encoded_image_size)
-        out = out.permute(0, 2, 3, 1)  # (batch_size, encoded_image_size, encoded_image_size, 2048)
+        
+        out = self.conv(out)
+        out = self.bn(out)
+        out = self.relu(out)       # (batch_size, 1024, image_size/32, image_size/32)
+        out = self.adaptive_pool(out)  # (batch_size, 1024, encoded_image_size, encoded_image_size)
+        out = out.permute(0, 2, 3, 1)  # (batch_size, encoded_image_size, encoded_image_size, 1024)
+        
+        img_size = out.size(2)
+        
+        # Get embeddings for the keywords
+        keyword_embeddings = self.embedding(encoded_keywords) # (batch_size, embed_dim ???)
+        keyword_embeddings = keyword_embeddings.unsqueeze(2).unsqueeze(3).repeat(1, 1, img_size, img_size) # bs, embed_dim, img_size, img_size
+        keyword_embeddings = keyword_embeddings.permute(0, 2, 3, 1)
+        
+        out = torch.cat([out, keyword_embeddings], dim=3)
+        
         return out
 
     def fine_tune(self, fine_tune=True):

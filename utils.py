@@ -86,7 +86,7 @@ def create_input_files(dataset, image_folder, captions_per_image, min_word_freq,
             val_image_captions.append(captions)
             val_image_keywords.append(keywords)
 
-        if randint(0, 100) < 10:
+        if randint(0, 100) < 50:
             test_image_paths.append(path)
             test_image_captions.append(captions)
             test_image_keywords.append(keywords)

@@ -31,7 +31,8 @@ def create_input_files(dataset, image_folder, captions_per_image, min_word_freq,
 #     # Read Karpathy JSON
 #     with open(karpathy_json_path, 'r') as j:
 #         data = json.load(j)
-
+    
+    dataset = pd.read_csv(dataset)
     # Read image paths and captions for each image
     train_image_paths = []
     train_image_captions = []

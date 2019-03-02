@@ -76,17 +76,18 @@ def create_input_files(dataset, image_folder, captions_per_image, min_word_freq,
         path = os.path.join(img)
         
         # This creates test-val split
-        if randint(0, 100) <= 80:
+        r = randint(0, 100)
+        if r <= 80:
             train_image_paths.append(path)
             train_image_captions.append(captions)
             train_image_keywords.append(keywords)
 
-        elif randint(0, 100) > 80:
+        elif r > 80:
             val_image_paths.append(path)
             val_image_captions.append(captions)
             val_image_keywords.append(keywords)
 
-        if randint(0, 100) < 50:
+        if r < 50:
             test_image_paths.append(path)
             test_image_captions.append(captions)
             test_image_keywords.append(keywords)

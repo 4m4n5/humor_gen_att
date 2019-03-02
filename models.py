@@ -9,7 +9,6 @@ class Encoder(nn.Module):
     """
     Encoder.
     """
-    # ================Pass new values======================
     def __init__(self, vocab_size, embed_dim, encoded_image_size=14):
         super(Encoder, self).__init__()
         self.enc_image_size = encoded_image_size
@@ -33,7 +32,6 @@ class Encoder(nn.Module):
 
         self.fine_tune()
 
-    # ================Pass new values======================
     def forward(self, images, encoded_keywords):
         """
         Forward propagation.
@@ -52,7 +50,9 @@ class Encoder(nn.Module):
         img_size = out.size(2)
         
         # Get embeddings for the keywords
-        keyword_embeddings = self.embedding(encoded_keywords) # (batch_size, embed_dim ???)
+        # import pdb; pdb.set_trace()
+        keyword_embeddings = self.embedding(encoded_keywords) # (batch_size, keyword_len, embed_dim)
+        keyword_embeddings = torch.mean(keyword_embeddings, dim=1)
         keyword_embeddings = keyword_embeddings.unsqueeze(2).unsqueeze(3).repeat(1, 1, img_size, img_size) # bs, embed_dim, img_size, img_size
         keyword_embeddings = keyword_embeddings.permute(0, 2, 3, 1)
         

@@ -53,7 +53,7 @@ def create_input_files(dataset, image_folder, captions_per_image, min_word_freq,
     for img in dataset['ImageName'].unique()[:num_images_to_train]:
         captions = []
         keywords = []
-        for index, row in dataset[dataset['ImageName'] == img].iterrows():
+        for index, row in dataset[dataset['ImageName'] == img][:captions_per_image].sort_values('Upvotes', ascending=False).iterrows():
             c = str(row['Caption'])
             k = str(row['Title'])
             

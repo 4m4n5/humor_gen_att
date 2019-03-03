@@ -32,6 +32,7 @@ def create_input_files(dataset, image_folder, captions_per_image, min_word_freq,
 #     with open(karpathy_json_path, 'r') as j:
 #         data = json.load(j)
     
+    f = 0
     dataset = pd.read_csv(dataset)
     # Read image paths and captions for each image
     train_image_paths = []
@@ -76,20 +77,20 @@ def create_input_files(dataset, image_folder, captions_per_image, min_word_freq,
             continue
             
         path = os.path.join(img)
-        
         # This creates test-val split
         r = randint(0, 100)
-        if r <= 80:
+        if r <= 100:
             train_image_paths.append(path)
             train_image_captions.append(captions)
             train_image_keywords.append(keywords)
-
-        elif r > 80:
+            
+        if f == 0:
             val_image_paths.append(path)
             val_image_captions.append(captions)
             val_image_keywords.append(keywords)
+            f = f + 1
 
-        if r < 50:
+        if r < 10:
             test_image_paths.append(path)
             test_image_captions.append(captions)
             test_image_keywords.append(keywords)
@@ -135,7 +136,7 @@ def create_input_files(dataset, image_folder, captions_per_image, min_word_freq,
             h.attrs['captions_per_image'] = captions_per_image
 
             # Create dataset inside HDF5 file to store images
-            images = h.create_dataset('images', (len(impaths), 3, 256, 256), dtype='uint8')
+            images = h.create_dataset('images', (len(impaths), 3, 128, 128), dtype='uint8')
 
             print("\nReading %s images and captions, storing to file...\n" % split)
 
@@ -166,9 +167,9 @@ def create_input_files(dataset, image_folder, captions_per_image, min_word_freq,
                 if len(img.shape) == 2:
                     img = img[:, :, np.newaxis]
                     img = np.concatenate([img, img, img], axis=2)
-                img = imresize(img, (256, 256))
+                img = imresize(img, (128, 128))
                 img = img.transpose(2, 0, 1)
-                assert img.shape == (3, 256, 256)
+                assert img.shape == (3, 128, 128)
                 assert np.max(img) <= 255
 
                 # Save image to HDF5 file

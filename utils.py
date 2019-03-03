@@ -64,7 +64,9 @@ def create_input_files(dataset, image_folder, captions_per_image, min_word_freq,
             keyword_tokens = [token.lower() for token in keyword_tokens]
 
             
-            if len(tokens) <= max_len:
+            if (len(tokens) <= max_len):
+                if len(keyword_tokens) > key_max_len:
+                    keyword_tokens = keyword_tokens[:key_max_len]
                 captions.append(tokens)
                 keywords.append(keyword_tokens)
                 word_freq.update(tokens)

@@ -3,3 +3,4 @@ img/*
 *.tar
 *.pyc
 __pycache__/*
+.ipynb_checkpoints/
